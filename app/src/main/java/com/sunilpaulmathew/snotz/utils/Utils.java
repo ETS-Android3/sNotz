@@ -30,6 +30,8 @@ import com.sunilpaulmathew.snotz.BuildConfig;
 import com.sunilpaulmathew.snotz.MainActivity;
 import com.sunilpaulmathew.snotz.R;
 import com.sunilpaulmathew.snotz.adapters.NotesAdapter;
+import com.sunilpaulmathew.snotz.bridge_implementation.DefaultUtility;
+import com.sunilpaulmathew.snotz.bridge_interface.Utility;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,6 +47,7 @@ import java.util.Objects;
  * Created by sunilpaulmathew <sunil.kde@gmail.com> on October 13, 2020
  */
 public class Utils {
+    private static final Utility u = new DefaultUtility();
 
     public static boolean isPackageInstalled(String packageID, Context context) {
         try {
@@ -61,8 +64,7 @@ public class Utils {
     }
 
     public static boolean isDarkTheme(Context context) {
-        int currentNightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+        return u.isDarkTheme(context);
     }
 
     public static void initializeAppTheme() {
@@ -227,19 +229,19 @@ public class Utils {
     }
 
     public static int getInt(String name, int defaults, Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getInt(name, defaults);
+        return u.getInt(name, defaults, context);
     }
 
     public static void saveInt(String name, int value, Context context) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(name, value).apply();
+        u.saveInt(name, value, context);
     }
 
     public static String getString(String name, String defaults, Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(name, defaults);
+        return u.getString(name, defaults, context);
     }
 
     public static void saveString(String name, String value, Context context) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(name, value).apply();
+        u.saveString(name, value, context);
     }
 
     public static boolean delete(String file) {

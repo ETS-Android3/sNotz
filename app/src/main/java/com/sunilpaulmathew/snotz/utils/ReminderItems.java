@@ -1,5 +1,8 @@
 package com.sunilpaulmathew.snotz.utils;
 
+import com.sunilpaulmathew.snotz.bridge_implementation.DefaultUtilsID;
+import com.sunilpaulmathew.snotz.bridge_interface.IDUtils;
+
 import java.io.Serializable;
 
 /*
@@ -8,8 +11,10 @@ import java.io.Serializable;
 public class ReminderItems implements Serializable {
 
     private final double mYear, mMonth, mDay;
-    private final int mHour, mID, mMin;
+    private final int mHour, mMin;
     private final String mNote;
+
+    private final IDUtils idu = new DefaultUtilsID();
 
     public ReminderItems(String note, double year, double month, double day, int hour, int min, int id) {
         this.mNote = note;
@@ -18,7 +23,8 @@ public class ReminderItems implements Serializable {
         this.mDay = day;
         this.mHour = hour;
         this.mMin = min;
-        this.mID = id;
+
+        idu.setID(id);
     }
 
     public double getYear() {
@@ -38,7 +44,7 @@ public class ReminderItems implements Serializable {
     }
 
     public int getNotificationID() {
-        return mID;
+        return idu.getID();
     }
 
     public int getMin() {

@@ -9,6 +9,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.sunilpaulmathew.snotz.MainActivity;
 import com.sunilpaulmathew.snotz.R;
 import com.sunilpaulmathew.snotz.adapters.SettingsAdapter;
+import com.sunilpaulmathew.snotz.bridge_implementation.DefaultSecurityUtils;
+import com.sunilpaulmathew.snotz.bridge_interface.SecurityUtils;
 
 import java.io.File;
 
@@ -17,8 +19,10 @@ import java.io.File;
  */
 public class Security {
 
+    private static final SecurityUtils su = new DefaultSecurityUtils();
+
     public static boolean isBiometricEnabled(Context context) {
-        return Utils.getBoolean("use_biometric", false, context);
+        return su.isBiometricEnabled(context);
     }
 
     public static boolean isHiddenNotesUnlocked(Context context) {
@@ -26,8 +30,7 @@ public class Security {
     }
 
     public static boolean isPINEnabled(Context context) {
-        return Utils.exist(new File(context.getCacheDir(),"pin").getAbsolutePath()) && Utils
-                .getBoolean("use_pin", false, context);
+        return su.isPINEnabled(context);
     }
 
     public static boolean isScreenLocked(Context context) {
@@ -35,70 +38,22 @@ public class Security {
     }
 
     public static String getPIN(Context context) {
-        return Utils.read(new File(context.getCacheDir(),"pin").getAbsolutePath());
+        return su.getPIN(context);
     }
 
     public static void removePIN(Context context) {
-        Utils.delete(new File(context.getCacheDir(),"pin").getAbsolutePath());
-        Utils.saveBoolean("use_pin", false, context);
+        su.removePIN(context);
     }
 
     public static void setPIN(String pin, Context context) {
-        Utils.create(pin, new File(context.getCacheDir(),"pin").getAbsolutePath());
-    }
+       su.setPIN(pin, context);}
 
     public static void setPIN(boolean verify, String title, SettingsAdapter adapter, Activity activity) {
-        Utils.dialogEditText(null, title,
-                (dialogInterface, i) -> {
-                }, text -> {
-                    if (text.length() != 4) {
-                        if (verify) {
-                            removePIN(activity);
-                        }
-                        Utils.showSnackbar(activity.findViewById(android.R.id.content), activity.getString(R.string.pin_length_warning));
-                    } else if (!verify) {
-                        setPIN(text, activity);
-                        setPIN(true, activity.getString(R.string.pin_reenter), adapter, activity);
-                    } else if (!text.equals(getPIN(activity))) {
-                        new MaterialAlertDialogBuilder(activity)
-                                .setMessage(activity.getString(R.string.pin_mismatch_message))
-                                .setCancelable(false)
-                                .setNegativeButton(R.string.cancel, (dialog, which) -> removePIN(activity))
-                                .setPositiveButton(R.string.try_again, (dialog, which) -> setPIN(true,
-                                        activity.getString(R.string.pin_reenter), adapter, activity)).show();
-                    } else {
-                        Utils.saveBoolean("use_pin", true, activity);
-                        Utils.showSnackbar(activity.findViewById(android.R.id.content), activity.getString(R.string.pin_protection_status,
-                                activity.getString(R.string.activated)));
-                        adapter.notifyItemChanged(2);
-                    }
-                }, InputType.TYPE_CLASS_NUMBER,activity).setOnDismissListener(dialogInterface -> {
-        }).show();
+       su.setPIN(verify, title, adapter, activity);
     }
 
     public static void authenticate(SettingsAdapter adapter, int position, Activity activity) {
-        Utils.dialogEditText(null, activity.getString(R.string.authenticate),
-                (dialogInterface, i) -> {
-                }, text -> {
-                    if (!text.equals(getPIN(activity))) {
-                        new MaterialAlertDialogBuilder(activity)
-                                .setMessage(activity.getString(R.string.pin_mismatch_message))
-                                .setCancelable(false)
-                                .setNegativeButton(R.string.cancel, (dialog, which) -> activity.finish())
-                                .setPositiveButton(R.string.try_again, (dialog, which) -> authenticate(adapter, position, activity)).show();
-                    } else {
-                        if (position == 3) {
-                            Utils.saveBoolean("hidden_note", !Utils.getBoolean("hidden_note", false, activity), activity);
-                        } else {
-                            Utils.delete(activity.getFilesDir().getPath() + "/snotz");
-                        }
-                        Utils.reloadUI(activity);
-                        if (adapter != null) {
-                            adapter.notifyItemChanged(position);
-                        }
-                    }
-                }, InputType.TYPE_CLASS_NUMBER,activity).setOnDismissListener(dialogInterface -> {
-        }).show();
+        su.authenticate(adapter, position, activity);
     }
 
     public static void authenticate(boolean remove, SettingsAdapter adapter, Activity activity) {
